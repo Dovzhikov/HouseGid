@@ -22,11 +22,20 @@
             android:onClick="deletedata"
             android:layout_height="wrap_content"/>
 
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+    <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Hello World, MyActivity"
             android:id="@+id/text"
             />
+        </ScrollView>
+    </HorizontalScrollView>
+
 </LinearLayout>
 

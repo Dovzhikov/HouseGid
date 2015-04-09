@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.example.myapp.database.DataBase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,9 +30,13 @@ public class MyActivity extends Activity
     private WifiManager manager;
 
 
-    private String ssid;
-    private String bssid;
-    private int level;
+    //    private String ssid[];
+//    private String bssid[];
+//    private int level[];
+    public ArrayList<String> ssid = new ArrayList<String>();
+    public ArrayList<String> bssid = new ArrayList<String>();
+    public ArrayList<Integer> level = new ArrayList<Integer>();
+
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -96,28 +101,34 @@ public class MyActivity extends Activity
     private DataBase db = new DataBase(this);
 
 
-    public void addtodb(View v) {
+    public void addtodb(View v) { // кнопка добавления в бд списка точек
+        String insertQuery;
         SQLiteDatabase sqdb = db.getWritableDatabase();
-        String insertQuery = "INSERT INTO " +
-                db.TABLE_NAME + " (" +
-                db.SSID + ", " + db.BSSID + ", " + db.LEVEL + ") VALUES ('" +
-                ssid + "' ,'" + bssid
-                + "' ,'" + level + "')";
-        sqdb.execSQL(insertQuery); //!!!
+        for (int i = 0; i < ssid.size(); i++) {
+            insertQuery = "INSERT INTO " +
+                    db.TABLE_NAME + " (" /*+
+                    db.SSID + ", "*/ + db.BSSID + ", " + db.LEVEL + ") VALUES ('" /*  +
+                    ssid.get(i) + "' ,'"   */ + bssid.get(i)
+                    + "' ,'" + level.get(i) + "')";
+            System.out.println(insertQuery.toString());
+            sqdb.execSQL(insertQuery); //!!!
+        }
     }
 
-    public void testselect(View view) {
+    public void testselect(View view) {   // запрос и вывод добавленных точек
         SQLiteDatabase sqdb = db.getWritableDatabase();
         String query = "SELECT * FROM " + db.TABLE_NAME;
         Cursor cursor = sqdb.rawQuery(query, null);
         while (cursor.moveToNext()) {
-            int id = cursor.getInt(cursor.getColumnIndex(db._ID));
-            String ssid = cursor.getString(cursor.getColumnIndex(db.SSID));
-            text.append("\n---\n" + ssid + "  " + bssid + "  " + level);
+            int id1 = cursor.getInt(cursor.getColumnIndex(db._ID));
+            String ssid1 = cursor.getString(cursor.getColumnIndex(db.SSID));
+            String bssid1 = cursor.getString(cursor.getColumnIndex(db.BSSID));
+            String level1 = cursor.getString(cursor.getColumnIndex(db.LEVEL));
+            text.append("\n---\n" + ssid1 + "  " + bssid1 + "  " + level1);
         }
     }
 
-    public void deletedata(View view) {
+    public void deletedata(View view) { // очистка данных бд
         SQLiteDatabase sqdb = db.getWritableDatabase();
         String delete = "DELETE FROM " + db.TABLE_NAME;
         sqdb.execSQL(delete);
@@ -135,9 +146,9 @@ public class MyActivity extends Activity
         //manager.getScanResults();
         for (ScanResult i : sr) {
             text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
-            ssid = i.SSID;
-            level = i.level;
-            bssid = i.BSSID;
+            ssid.add(i.SSID);
+            level.add(i.level);
+            bssid.add(i.BSSID);
         }
 //            }
 //        }, 280, 280);
