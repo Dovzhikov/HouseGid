@@ -9,6 +9,18 @@
               android:id="@+id/cdEnable"
               android:text="Enable/Disable Wi-Fi"
             />
+    <Button android:layout_width="wrap_content"
+            android:text="Add to db"
+            android:onClick="addtodb"
+            android:layout_height="wrap_content"/>
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Тестовый select"
+            android:onClick="testselect"/>
+    <Button android:layout_width="wrap_content"
+            android:text="Очистить базу данных"
+            android:onClick="deletedata"
+            android:layout_height="wrap_content"/>
 
     <TextView
             android:layout_width="fill_parent"
@@ -16,6 +28,5 @@
             android:text="Hello World, MyActivity"
             android:id="@+id/text"
             />
-
 </LinearLayout>
 
