@@ -7,8 +7,7 @@
     <CheckBox android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:id="@+id/cdEnable"
-              android:text="Enable/Disable Wi-Fi"
-            />
+              android:text="Enable/Disable Wi-Fi"/>
     <Button android:layout_width="wrap_content"
             android:text="Add to db"
             android:onClick="addtodb"
@@ -28,12 +27,12 @@
         <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World, MyActivity"
-            android:id="@+id/text"
-            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello World, MyActivity"
+                    android:id="@+id/text"
+                    />
         </ScrollView>
     </HorizontalScrollView>
 
