@@ -9,34 +9,32 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Message;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.example.myapp.database.DataBase;
+import android.os.Handler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MyActivity extends Activity
         implements OnCheckedChangeListener {
     private TextView text;
     private CheckBox cbEnable;
     private WifiManager manager;
+    public List<Point> pointList;
+    private EditText editText;
+    private TextView largeText;
 
-
-    //    private String ssid[];
-//    private String bssid[];
-//    private int level[];
     public ArrayList<String> ssid = new ArrayList<String>();
     public ArrayList<String> bssid = new ArrayList<String>();
     public ArrayList<Integer> level = new ArrayList<Integer>();
-
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -50,15 +48,12 @@ public class MyActivity extends Activity
                 case WifiManager.WIFI_STATE_ENABLED:
                     text.setText("Wi-Fi state enabled");
                     startMonitoringRssi();
-                    //WifiInfo in = manager.getConnectionInfo();
-                    //text.append("\n"+in.getSSID());
                     break;
                 case WifiManager.WIFI_STATE_DISABLING:
                     text.setText("Wi-Fi state disabling");
                     break;
                 case WifiManager.WIFI_STATE_DISABLED:
                     text.setText("Wi-Fi state disabled");
-                    //stopMonitoringRssi();
                     break;
                 case WifiManager.WIFI_STATE_UNKNOWN:
                     text.setText("Wi-Fi state unknown");
@@ -67,18 +62,12 @@ public class MyActivity extends Activity
         }
     };
 
-    //    public BroadcastReceiver rssiReceiver = new BroadcastReceiver(){
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            WifiInfo info = manager.getConnectionInfo();
-//
-//            text.append("\nChange signal in " + info.getSSID());
-//            text.append("\n\tSignal level:\t" +
-//                    WifiManager.calculateSignalLevel(info.getRssi(), 5));
-//            text.append("\n\tLink speed:\t" + info.getLinkSpeed() +
-//                    " " + WifiInfo.LINK_SPEED_UNITS);
-//        }
-//    };
+    public String Repl(String s) {
+        s.replaceAll(";", "':");
+        return s.replaceAll("'", "''");
+
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,8 +78,10 @@ public class MyActivity extends Activity
         this.registerReceiver(this.receiver,
                 new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
         cbEnable.setChecked(manager.isWifiEnabled());//
-        //cbEnable.setChecked(false);
         cbEnable.setOnCheckedChangeListener(this);
+        pointList = new ArrayList<>();
+        editText = (EditText) findViewById(R.id.editText);
+        largeText = (TextView) findViewById(R.id.textView);
     }
 
     @Override
@@ -100,31 +91,69 @@ public class MyActivity extends Activity
 
     private DataBase db = new DataBase(this);
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            text.setText("");
+            if (manager.getScanResults() != null) {
+            //    bssid.clear();
+              //  ssid.clear();
+                //level.clear();
+                List<ScanResult> scanResultList = manager.getScanResults();
+                for (ScanResult i : scanResultList) {
+                    text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
+ //                   if (!bssid.contains(i.BSSID)) {
+  //                      ssid.add(i.SSID);
+    //                    level.add(i.level);
+      //                  bssid.add(i.BSSID);
+        //            }
+                }
+          //      text.append("\n Wi-Fi bssid Count: " + bssid.size());
+                searchPoint(scanResultList);
+            }
+        }
+    };
 
-    public void addtodb(View v) { // кнопка добавления в бд списка точек
+    public void addtodb(View v) { // ?????? ?????????? ? ?? ?????? ?????
         String insertQuery;
         SQLiteDatabase sqdb = db.getWritableDatabase();
-        for (int i = 0; i < ssid.size(); i++) {
+        for (int i = 0; i < bssid.size(); i++) {
             insertQuery = "INSERT INTO " +
-                    db.TABLE_NAME + " (" /*+
-                    db.SSID + ", "*/ + db.BSSID + ", " + db.LEVEL + ") VALUES ('" /*  +
-                    ssid.get(i) + "' ,'"   */ + bssid.get(i)
+                    db.TABLE_NAME + " (" +
+                    db.SSID + ", " + db.BSSID + ", " + db.LEVEL + ") VALUES ('" +
+                    Repl(ssid.get(i)) + "' ,'" + bssid.get(i)
                     + "' ,'" + level.get(i) + "')";
             System.out.println(insertQuery.toString());
             sqdb.execSQL(insertQuery); //!!!
         }
     }
 
+    public void addnewpoint(View v){
+        pointList.add(new Point(editText.getText().toString(),manager.getScanResults()));
+    }
+
+    public void writePoint(View v){
+        for(Point p:pointList){
+            text.append("\n"+p.pointName);
+            for (ScanResult i: p.scanResults){
+                text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
+            }
+            text.append("\n"+"------------");
+        }
+    }
+
+
     public void testselect(View view) {   // запрос и вывод добавленных точек
         SQLiteDatabase sqdb = db.getWritableDatabase();
         String query = "SELECT * FROM " + db.TABLE_NAME;
         Cursor cursor = sqdb.rawQuery(query, null);
+        int j = 1;
         while (cursor.moveToNext()) {
             int id1 = cursor.getInt(cursor.getColumnIndex(db._ID));
             String ssid1 = cursor.getString(cursor.getColumnIndex(db.SSID));
             String bssid1 = cursor.getString(cursor.getColumnIndex(db.BSSID));
             String level1 = cursor.getString(cursor.getColumnIndex(db.LEVEL));
-            text.append("\n---\n" + ssid1 + "  " + bssid1 + "  " + level1);
+            text.append("\n---\n" + j++ + "." + ssid1 + "  " + bssid1 + "  " + level1);
         }
     }
 
@@ -134,29 +163,28 @@ public class MyActivity extends Activity
         sqdb.execSQL(delete);
     }
 
-    public void startMonitoringRssi() {
-        //int j = 0;
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-        manager.startScan();
-        List<ScanResult> sr = manager.getScanResults();
 
-        //manager.getScanResults();
-        for (ScanResult i : sr) {
-            text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
-            ssid.add(i.SSID);
-            level.add(i.level);
-            bssid.add(i.BSSID);
+    public void searchPoint(List<ScanResult> list){
+        for (Point p: pointList){
+            largeText.setText(p.Compare(list));
         }
-//            }
-//        }, 280, 280);
-
     }
 
-//    private void stopMonitoringRssi() {
-//        if (this.rssiReceiver.isInitialStickyBroadcast())
-//            this.unregisterReceiver(rssiReceiver);
-//    }
+    public void startMonitoringRssi() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (cbEnable.isChecked()) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    manager.startScan();
+                    handler.sendMessage(handler.obtainMessage());
+                }
+            }
+        });
+        t.start();
+    }
 }

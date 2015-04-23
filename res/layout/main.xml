@@ -3,12 +3,17 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-        >
+              android:weightSum="1">
     <CheckBox android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:id="@+id/cdEnable"
-              android:text="Enable/Disable Wi-Fi"
-            />
+              android:text="Enable/Disable Wi-Fi"/>
+    <TextView
+            android:layout_width="177dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Text"
+            android:id="@+id/textView" android:layout_weight="0.10" android:textSize="40dp"/>
     <Button android:layout_width="wrap_content"
             android:text="Add to db"
             android:onClick="addtodb"
@@ -16,24 +21,39 @@
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Тестовый select"
-            android:onClick="testselect"/>
+            android:onClick="writePoint"/>
     <Button android:layout_width="wrap_content"
             android:text="Очистить базу данных"
             android:onClick="deletedata"
             android:layout_height="wrap_content"/>
 
+    <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_gravity="center_horizontal">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Point"
+                android:id="@+id/button" android:layout_gravity="center_horizontal" android:clickable="true"
+                android:onClick="addnewpoint"
+                android:singleLine="true"/>
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/editText" android:text="New point" android:layout_weight="0.57"/>
+    </TableRow>
     <HorizontalScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
         <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World, MyActivity"
-            android:id="@+id/text"
-            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello World, MyActivity"
+                    android:id="@+id/text"
+                    />
         </ScrollView>
     </HorizontalScrollView>
 
