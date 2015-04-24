@@ -15,8 +15,8 @@
             android:text="Text"
             android:id="@+id/textView" android:layout_weight="0.10" android:textSize="40dp"/>
     <Button android:layout_width="wrap_content"
-            android:text="Add to db"
-            android:onClick="addtodb"
+            android:text="Open"
+            android:onClick="openactivity"
             android:layout_height="wrap_content"/>
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"

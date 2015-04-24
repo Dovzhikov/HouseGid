@@ -23,5 +23,6 @@
                 <action android:name="android.net.wifi.ACCES_WIFI_STATE"/>
             </intent-filter>
         </activity>
+        <activity android:name=".PointView" android:label="Points"/>
     </application>
 </manifest>

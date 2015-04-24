@@ -1,8 +1,10 @@
 package com.example.myapp;
 
 import android.app.Activity;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.content.BroadcastReceiver;
@@ -28,10 +30,12 @@ public class MyActivity extends Activity
     private TextView text;
     private CheckBox cbEnable;
     private WifiManager manager;
-    public List<Point> pointList;
+    public ArrayList<Point> pointList;
     private EditText editText;
     private TextView largeText;
+    private Point p = null;
 
+    private int lalka = 0;
     public ArrayList<String> ssid = new ArrayList<String>();
     public ArrayList<String> bssid = new ArrayList<String>();
     public ArrayList<Integer> level = new ArrayList<Integer>();
@@ -82,6 +86,7 @@ public class MyActivity extends Activity
         pointList = new ArrayList<>();
         editText = (EditText) findViewById(R.id.editText);
         largeText = (TextView) findViewById(R.id.textView);
+        editText.setText("" + lalka++);
     }
 
     @Override
@@ -96,23 +101,46 @@ public class MyActivity extends Activity
         public void handleMessage(Message msg) {
             text.setText("");
             if (manager.getScanResults() != null) {
-            //    bssid.clear();
-              //  ssid.clear();
+                //    bssid.clear();
+                //  ssid.clear();
                 //level.clear();
                 List<ScanResult> scanResultList = manager.getScanResults();
-                for (ScanResult i : scanResultList) {
-                    text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
- //                   if (!bssid.contains(i.BSSID)) {
-  //                      ssid.add(i.SSID);
-    //                    level.add(i.level);
-      //                  bssid.add(i.BSSID);
-        //            }
+                if (p != null) {
+                    for (ScanResult s : p.scanResults) {
+                        text.setTextColor(Color.WHITE);
+                        text.append("\n" + s.SSID + "  " + s.level + "  " + s.BSSID);
+                        for (ScanResult l : scanResultList) {
+                            if (s.BSSID.equals(l.BSSID)) {
+                                text.setTextColor(Color.RED);
+                                text.append(" " + l.level + " Name" + p.pointName);
+                            }
+                        }
+                    }
                 }
-          //      text.append("\n Wi-Fi bssid Count: " + bssid.size());
+                else {
+                    for (ScanResult i : scanResultList) {
+                        text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
+                        //                   if (!bssid.contains(i.BSSID)) {
+                        //                      ssid.add(i.SSID);
+                        //                    level.add(i.level);
+                        //                  bssid.add(i.BSSID);
+                        //            }
+                    }
+                }
+                //      text.append("\n Wi-Fi bssid Count: " + bssid.size());
                 searchPoint(scanResultList);
             }
         }
     };
+
+
+    public void openactivity(View v) {
+        Intent intent = new Intent(MyActivity.this, PointView.class);
+//        intent.putExtra("list",pointList);
+        intent.putParcelableArrayListExtra("list", pointList);
+        startActivityForResult(intent, 0);
+
+    }
 
     public void addtodb(View v) { // ?????? ?????????? ? ?? ?????? ?????
         String insertQuery;
@@ -128,17 +156,18 @@ public class MyActivity extends Activity
         }
     }
 
-    public void addnewpoint(View v){
-        pointList.add(new Point(editText.getText().toString(),manager.getScanResults()));
+    public void addnewpoint(View v) {
+        pointList.add(new Point(editText.getText().toString(), manager.getScanResults()));
+        editText.setText("" + lalka++);
     }
 
-    public void writePoint(View v){
-        for(Point p:pointList){
-            text.append("\n"+p.pointName);
-            for (ScanResult i: p.scanResults){
+    public void writePoint(View v) {
+        for (Point p : pointList) {
+            text.append("\n" + p.pointName);
+            for (ScanResult i : p.scanResults) {
                 text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
             }
-            text.append("\n"+"------------");
+            text.append("\n" + "------------");
         }
     }
 
@@ -163,9 +192,17 @@ public class MyActivity extends Activity
         sqdb.execSQL(delete);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            p = data.getParcelableExtra("result");
+            //editText.setText("Result="+p.pointName);
+        }
+    }
 
-    public void searchPoint(List<ScanResult> list){
-        for (Point p: pointList){
+    public void searchPoint(List<ScanResult> list) {
+        for (Point p : pointList) {
             largeText.setText(p.Compare(list));
         }
     }
