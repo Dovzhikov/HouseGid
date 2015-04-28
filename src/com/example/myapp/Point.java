@@ -10,13 +10,12 @@ import java.util.*;
  * Created by User on 19.04.2015.
  */
 public class Point implements Parcelable {
-//    public ArrayList<String> ssid = new ArrayList<String>();
+    //    public ArrayList<String> ssid = new ArrayList<String>();
 //    public ArrayList<String> bssid = new ArrayList<String>();
 //    public ArrayList<Integer> level = new ArrayList<Integer>();
     public List<ScanResult> scanResults;
     public String pointName;
     private int count;
-
 
 
     @Override
@@ -30,7 +29,7 @@ public class Point implements Parcelable {
         return 0;
     }
 
-    private Point(Parcel parcel){
+    private Point(Parcel parcel) {
         pointName = parcel.readString();
         scanResults = parcel.readArrayList(ClassLoader.getSystemClassLoader());
     }
@@ -46,7 +45,7 @@ public class Point implements Parcelable {
         Collections.sort(list, new Comparator<ScanResult>() {
             @Override
             public int compare(ScanResult scanResult, ScanResult t1) {
-                if (scanResult.level>=t1.level) return -1;
+                if (scanResult.level >= t1.level) return -1;
                 else return 1;
             }
         });
@@ -61,17 +60,18 @@ public class Point implements Parcelable {
 //        }
         this.count = list.size();
     }
+
     private boolean compareLevel(int pointLevel, int scanLevel) {
-        return (scanLevel > pointLevel - 15 && scanLevel < pointLevel + 15);
+        return (scanLevel > pointLevel - 10 && scanLevel < pointLevel + 10);
     }
 
-    private void addnewhotspot(List<ScanResult> list){
-        for (ScanResult s : list){
+    private void addnewhotspot(List<ScanResult> list) {
+        for (ScanResult s : list) {
             boolean flag = true;
-            for (ScanResult l: scanResults){
-                if (s.BSSID.equals(l.BSSID)) flag=false;
+            for (ScanResult l : scanResults) {
+                if (s.BSSID.equals(l.BSSID)) flag = false;
             }
-            if(flag){
+            if (flag) {
                 scanResults.add(s);
                 flag = true;
             }
@@ -83,7 +83,7 @@ public class Point implements Parcelable {
         return pointName;
     }
 
-    public String Compare(List<ScanResult> list) {
+    public boolean Compare(List<ScanResult> list) {
         int res = 0;
         for (ScanResult s : list) {
             //for (int i = 0; i< count;i++) {
@@ -95,21 +95,21 @@ public class Point implements Parcelable {
                 }
             }
         }
-        if (res >= 0) {
-//            addnewhotspot(list);
-            return this.pointName;
-        } else {
-            return "Search...";
-        }
+        if (res >= count)
+            //return this.pointName;
+            return true;
+        else
+            return false;
+
     }
 
 
-
-    public static final Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>(){
-        public Point createFromParcel(Parcel in){
+    public static final Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {
+        public Point createFromParcel(Parcel in) {
             return new Point(in);
         }
-        public Point[] newArray(int size){
+
+        public Point[] newArray(int size) {
             return new Point[size];
         }
     };

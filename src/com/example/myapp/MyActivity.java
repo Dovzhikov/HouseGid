@@ -22,6 +22,9 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.example.myapp.database.DataBase;
 import android.os.Handler;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +37,9 @@ public class MyActivity extends Activity
     private EditText editText;
     private TextView largeText;
     private Point p = null;
+    private List<ScanResult> scanResultList;
+    int Tmp = 0;
+    int t = 1;
 
     private int lalka = 0;
     public ArrayList<String> ssid = new ArrayList<String>();
@@ -87,6 +93,7 @@ public class MyActivity extends Activity
         editText = (EditText) findViewById(R.id.editText);
         largeText = (TextView) findViewById(R.id.textView);
         editText.setText("" + lalka++);
+
     }
 
     @Override
@@ -100,11 +107,12 @@ public class MyActivity extends Activity
         @Override
         public void handleMessage(Message msg) {
             text.setText("");
+
             if (manager.getScanResults() != null) {
                 //    bssid.clear();
                 //  ssid.clear();
                 //level.clear();
-                List<ScanResult> scanResultList = manager.getScanResults();
+                scanResultList = manager.getScanResults();
                 if (p != null) {
                     for (ScanResult s : p.scanResults) {
                         text.setTextColor(Color.WHITE);
@@ -112,13 +120,15 @@ public class MyActivity extends Activity
                         for (ScanResult l : scanResultList) {
                             if (s.BSSID.equals(l.BSSID)) {
                                 text.setTextColor(Color.RED);
-                                text.append(" " + l.level + " Name" + p.pointName);
+                                text.append(" " + l.level + " Name " + p.pointName);
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     for (ScanResult i : scanResultList) {
+
+                     //   Tmp += i.level;
+                     //   text.append(" Avg = "+Tmp/t++);
                         text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
                         //                   if (!bssid.contains(i.BSSID)) {
                         //                      ssid.add(i.SSID);
@@ -203,7 +213,10 @@ public class MyActivity extends Activity
 
     public void searchPoint(List<ScanResult> list) {
         for (Point p : pointList) {
-            largeText.setText(p.Compare(list));
+            if(p.Compare(list)){
+                largeText.setText(p.pointName);
+                break;
+            }
         }
     }
 
