@@ -12,34 +12,37 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.os.Message;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.example.myapp.database.DataBase;
 import android.os.Handler;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyActivity extends Activity
-        implements OnCheckedChangeListener {
+public class MyActivity extends Activity implements OnCheckedChangeListener {
     private TextView text;
     private CheckBox cbEnable;
     private WifiManager manager;
     public ArrayList<Point> pointList;
-    private EditText editText;
     private TextView largeText;
     private Point p = null;
     private List<ScanResult> scanResultList;
     int Tmp = 0;
     int t = 1;
+
+    private static final String DIRECTORY_DOCUMENTS = "/docs";
+    private static final String FILE_EXT = ".txt";
+    private EditText editText;
+    private String dir;
+    private StringBuffer temp;
 
     private int lalka = 0;
     public ArrayList<String> ssid = new ArrayList<String>();
@@ -82,6 +85,10 @@ public class MyActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        dir = Environment.getExternalStorageDirectory().toString() + DIRECTORY_DOCUMENTS;
+        File folder = new File(dir);
+
         text = (TextView) findViewById(R.id.text);
         cbEnable = (CheckBox) findViewById(R.id.cdEnable);
         manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -93,7 +100,21 @@ public class MyActivity extends Activity
         editText = (EditText) findViewById(R.id.editText);
         largeText = (TextView) findViewById(R.id.textView);
         editText.setText("" + lalka++);
+    }
 
+    private void saveFile(String fileName) {
+        try {
+            if (fileName.endsWith(FILE_EXT)) {
+                fileName += FILE_EXT;
+            }
+            File file = new File(dir, fileName);
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(temp.toString().getBytes());
+            fos.close();
+        }
+        catch (Exception e) {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show(); // вывод ошибок
+        }
     }
 
     @Override
@@ -152,7 +173,7 @@ public class MyActivity extends Activity
 
     }
 
-    public void addtodb(View v) { // ?????? ?????????? ? ?? ?????? ?????
+    public void addtodb(View v) {
         String insertQuery;
         SQLiteDatabase sqdb = db.getWritableDatabase();
         for (int i = 0; i < bssid.size(); i++) {
@@ -172,13 +193,22 @@ public class MyActivity extends Activity
     }
 
     public void writePoint(View v) {
-        for (Point p : pointList) {
+        /*for (Point p : pointList) {
             text.append("\n" + p.pointName);
             for (ScanResult i : p.scanResults) {
                 text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
             }
             text.append("\n" + "------------");
+        }*/
+
+        for (Point p : pointList) {
+            temp.append(p.pointName + "\n");
+            for (ScanResult i : p.scanResults) {
+                temp.append(i.SSID + "     |     " + i.BSSID + "     |     " + i.level);
+            }
+            temp.append("**********");
         }
+        saveFile("testing");
     }
 
 

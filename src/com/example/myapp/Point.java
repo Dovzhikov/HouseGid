@@ -100,7 +100,6 @@ public class Point implements Parcelable {
             return true;
         else
             return false;
-
     }
 
 
