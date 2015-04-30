@@ -32,17 +32,17 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
     private CheckBox cbEnable;
     private WifiManager manager;
     public ArrayList<Point> pointList;
-    private TextView largeText;
+    private TextView textView;
     private Point p = null;
     private List<ScanResult> scanResultList;
     int Tmp = 0;
     int t = 1;
 
-    private static final String DIRECTORY_DOCUMENTS = "/docs";
-    private static final String FILE_EXT = ".txt";
+    private static final String DIRECTORY_DOCUMENTS = "/HouseGid";
+    private static final String FILE_EXT = ".point";
     private EditText editText;
     private String dir;
-    private StringBuffer temp;
+    private StringBuilder temp = new StringBuilder();
 
     private int lalka = 0;
     public ArrayList<String> ssid = new ArrayList<String>();
@@ -78,7 +78,6 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
     public String Repl(String s) {
         s.replaceAll(";", "':");
         return s.replaceAll("'", "''");
-
     }
 
     @Override
@@ -89,16 +88,20 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
         dir = Environment.getExternalStorageDirectory().toString() + DIRECTORY_DOCUMENTS;
         File folder = new File(dir);
 
+        if (!folder.exists()) folder.mkdir();
+
+
+        textView = (TextView)findViewById(R.id.textView);
+
         text = (TextView) findViewById(R.id.text);
         cbEnable = (CheckBox) findViewById(R.id.cdEnable);
         manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        this.registerReceiver(this.receiver,
-                new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+        this.registerReceiver(this.receiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
         cbEnable.setChecked(manager.isWifiEnabled());//
         cbEnable.setOnCheckedChangeListener(this);
         pointList = new ArrayList<>();
         editText = (EditText) findViewById(R.id.editText);
-        largeText = (TextView) findViewById(R.id.textView);
+        //largeText = (TextView) findViewById(R.id.textView);
         editText.setText("" + lalka++);
     }
 
@@ -113,7 +116,7 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
             fos.close();
         }
         catch (Exception e) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show(); // вывод ошибок
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show(); // вывод экзепшена
         }
     }
 
@@ -148,8 +151,8 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
                 } else {
                     for (ScanResult i : scanResultList) {
 
-                     //   Tmp += i.level;
-                     //   text.append(" Avg = "+Tmp/t++);
+                        //   Tmp += i.level;
+                        //   text.append(" Avg = "+Tmp/t++);
                         text.append("\n" + i.SSID + "  " + i.level + "  " + i.BSSID);
                         //                   if (!bssid.contains(i.BSSID)) {
                         //                      ssid.add(i.SSID);
@@ -165,34 +168,17 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
     };
 
 
-    public void openactivity(View v) {
+    public void openActivity(View v) {
         Intent intent = new Intent(MyActivity.this, PointView.class);
 //        intent.putExtra("list",pointList);
         intent.putParcelableArrayListExtra("list", pointList);
         startActivityForResult(intent, 0);
-
-    }
-
-    public void addtodb(View v) {
-        String insertQuery;
-        SQLiteDatabase sqdb = db.getWritableDatabase();
-        for (int i = 0; i < bssid.size(); i++) {
-            insertQuery = "INSERT INTO " +
-                    db.TABLE_NAME + " (" +
-                    db.SSID + ", " + db.BSSID + ", " + db.LEVEL + ") VALUES ('" +
-                    Repl(ssid.get(i)) + "' ,'" + bssid.get(i)
-                    + "' ,'" + level.get(i) + "')";
-            System.out.println(insertQuery.toString());
-            sqdb.execSQL(insertQuery); //!!!
-        }
-    }
-
-    public void addnewpoint(View v) {
-        pointList.add(new Point(editText.getText().toString(), manager.getScanResults()));
-        editText.setText("" + lalka++);
     }
 
     public void writePoint(View v) {
+        pointList.add(new Point(editText.getText().toString(), manager.getScanResults()));
+        editText.setText("" + lalka++);
+
         /*for (Point p : pointList) {
             text.append("\n" + p.pointName);
             for (ScanResult i : p.scanResults) {
@@ -202,34 +188,17 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
         }*/
 
         for (Point p : pointList) {
-            temp.append(p.pointName + "\n");
+            temp.append(p.pointName);
+            temp.append(System.getProperty("line.separator"));
             for (ScanResult i : p.scanResults) {
                 temp.append(i.SSID + "     |     " + i.BSSID + "     |     " + i.level);
+                temp.append(System.getProperty("line.separator"));
+               // System.out.println(i.SSID + "     |     " + i.BSSID + "     |     " + i.level);
             }
-            temp.append("**********");
+          //  temp.append("**********");
         }
-        saveFile("testing");
-    }
-
-
-    public void testselect(View view) {   // запрос и вывод добавленных точек
-        SQLiteDatabase sqdb = db.getWritableDatabase();
-        String query = "SELECT * FROM " + db.TABLE_NAME;
-        Cursor cursor = sqdb.rawQuery(query, null);
-        int j = 1;
-        while (cursor.moveToNext()) {
-            int id1 = cursor.getInt(cursor.getColumnIndex(db._ID));
-            String ssid1 = cursor.getString(cursor.getColumnIndex(db.SSID));
-            String bssid1 = cursor.getString(cursor.getColumnIndex(db.BSSID));
-            String level1 = cursor.getString(cursor.getColumnIndex(db.LEVEL));
-            text.append("\n---\n" + j++ + "." + ssid1 + "  " + bssid1 + "  " + level1);
-        }
-    }
-
-    public void deletedata(View view) { // очистка данных бд
-        SQLiteDatabase sqdb = db.getWritableDatabase();
-        String delete = "DELETE FROM " + db.TABLE_NAME;
-        sqdb.execSQL(delete);
+        System.out.println(temp);
+        saveFile("temp"); // можно создавать для одной местности или карты один файл с поинтами
     }
 
     @Override
@@ -244,7 +213,7 @@ public class MyActivity extends Activity implements OnCheckedChangeListener {
     public void searchPoint(List<ScanResult> list) {
         for (Point p : pointList) {
             if(p.Compare(list)){
-                largeText.setText(p.pointName);
+                textView.setText(p.pointName);
                 break;
             }
         }
